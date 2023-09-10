@@ -6,7 +6,8 @@
    [tweegeemee.image   :as image]
    [environ.core       :refer [env]]
    [clojure.java.io    :as io]
-   [clojure.java.jdbc  :as sql])
+   [clojure.java.jdbc  :as sql]
+   [clojure.string])
   (:import [java.io File]
            [javax.imageio ImageIO])
   (:gen-class))
@@ -71,6 +72,29 @@
   png-filename and json-filename"
   [timestamp suffix]
   (make-code-and-png* get-random-code timestamp suffix))
+
+(declare get-random-code)
+(declare get-random-child)
+(declare get-random-mutant)
+(defn- make-png-from-file
+  "create from a file containing a code-string and save as files. Optinally with size or width/height"
+  ([clj-filename png-filename]
+   (make-png-from-file clj-filename png-filename image/IMAGE-SIZE))
+  ([clj-filename png-filename size]
+   (make-png-from-file clj-filename png-filename size size))
+  ([clj-filename png-filename width height] 
+  (defonce my-old-hashes (set (map nil nil)))
+  (defonce my-old-image-hashes (set (map nil nil)))
+  (let [my-code-str (slurp clj-filename)
+        ;;todo:why not? my-code-str2 (clojure.string/replace my-code-str #"^\." "")
+        my-code-str2 (clojure.string/replace my-code-str #"([\r\n])\.*" "$1")
+        my-code (read-string my-code-str2)]
+    (if (nil? my-code)
+      false
+      (let [my-image (clisk.live/image (eval my-code) :width width :height height)]
+        (write-png png-filename my-image)
+        (spit clj-filename (pr-str my-code))
+        true)))))
 
 (defn- make-random-child-and-png
   "take 2 codes, breed them and save as files. return the code,

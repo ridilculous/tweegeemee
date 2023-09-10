@@ -21,3 +21,4 @@ orig_profiles.clj
 .clj-kondo/
 .vscode/
 archive/
+/notes.adoc
